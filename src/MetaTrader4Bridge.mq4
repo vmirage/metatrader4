@@ -553,12 +553,12 @@ void InterpretZmqMessage(Socket& pSocket, string& compArray[]) {
         }
 		response = StringFormat("%d|%s", RESPONSE_OK, "{\"status\":" + status + "}");
 	} else if (type == REQUEST_CHART) {
-		bool opened = ChartOpen(compArray[3], 1) != 0;
-		if (opened) {
+		long chartID = ChartOpen(compArray[3], 1);
+		if (chartID != 0) {
 			Sleep(100);
 			MqlRates rates[];
 			ArrayCopyRates(rates, compArray[3], 1);
-			closeAllChart();
+			ChartClose(chartID);
 			string json = ratesToJson(rates);
 			response = StringFormat("%d|%s", RESPONSE_OK, json);
 		} else {
@@ -892,18 +892,6 @@ void RemoveIndexFromArray(string &MyArray[], int index) {
 void ArrayPush(string & array[], string dataToPush) {
     int count = ArrayResize(array, ArraySize(array) + 1);
     array[ArraySize(array) - 1] = dataToPush;
-}
-
-void closeAllChart() {
-	long currChart,prevChart=ChartFirst();
-	int i=0,limit=100;
-	while(i<limit) {
-		currChart=ChartNext(prevChart);
-        if(currChart<0) break;
-        ChartClose(currChart);
-        prevChart=currChart;
-        i++;
-	}
 }
 
 string rateToJson(MqlRates &rate) {
